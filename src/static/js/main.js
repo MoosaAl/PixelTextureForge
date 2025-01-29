@@ -72,6 +72,16 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     });
 
+    window.addEventListener('paste', e => {
+        selectedFile = e.clipboardData.files[0];
+    
+        console.log('pasted');
+
+        if (selectedFile) {
+            file_reader(selectedFile, 'uploadedImage', 'imageContainer');
+        }
+    });
+
     document.getElementById("setOutputAsInput").addEventListener('click', function() {
         selectedFile = outputFile;
         file_reader(selectedFile, 'uploadedImage', 'imageContainer');
