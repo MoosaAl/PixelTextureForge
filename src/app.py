@@ -203,6 +203,17 @@ def colour_palette():
     img_io.seek(0)
     return send_file(img_io, mimetype='image/png') 
 
+@app.route('/get_colour_palette', methods=['POST'])
+def get_colour_palette():
+    img = verify_file(request)
+
+    new_img = pixel_gen.extract_colours(img)
+
+    img_io = BytesIO()
+    new_img.save(img_io, 'PNG')
+    img_io.seek(0)
+    return send_file(img_io, mimetype='image/png')
+
 @app.route('/colour_shift', methods=['POST'])
 def colour_shift():
     img = verify_file(request)

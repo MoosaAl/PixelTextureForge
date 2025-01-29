@@ -132,6 +132,14 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     });
 
+    document.getElementById('getColourPalette').addEventListener('click', function(event) {
+        if (selectedFile) {
+            const formData = new FormData();
+            formData.append('image', selectedFile);
+            fetch_command('/get_colour_palette', formData);
+        }
+    });
+
     document.getElementById('generateNoise').addEventListener('click', async function(event) {
         const formData = new FormData();
         const texture_type =  document.getElementById('textureOption').value;
