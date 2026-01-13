@@ -19,7 +19,6 @@ class PixelGenerator:
   
                 img_array[y, x] = (new_r, new_g, new_b, a)
 
-
         return Image.fromarray(img_array.astype('uint8'))
 
     def get_avg_colour(self, img):
@@ -94,7 +93,7 @@ class PixelGenerator:
 
     def get_colour_palette(self, img_array, num_colours=6):
         pixels = img_array.reshape((-1,4))
-        rand_int = np.random.randint(0, 2**32)
+        rand_int = np.random.randint(0, 2**31)
         kmeans = KMeans(n_clusters=num_colours, random_state=rand_int)
         kmeans.fit(pixels)
         colours = kmeans.cluster_centers_.astype(int)
@@ -124,27 +123,3 @@ class PixelGenerator:
 
         return Image.fromarray(quantized.astype('uint8'))
     
-    def extract_colours(self, img):
-        img = img.convert('RGB')
-
-        img_array = np.array(img)
-        colours = img_array.reshape(-1, 3)
-
-        unique_colours = []
-        seen = set()
-
-        for colour in colours:
-            colour_tuple = tuple(colour)
-            if colour_tuple not in seen:
-                seen.add(colour_tuple)
-                unique_colours.append(colour)
-
-        unique_colours = np.array(unique_colours)
-
-        colour_line = np.zeros((1, len(unique_colours), 3), dtype=np.uint8)
-        colour_line[0, :, :] = unique_colours
-
-        colour_line_img = Image.fromarray(colour_line)
-        colour_line_img = colour_line_img.resize((len(unique_colours), 1), Image.Resampling.NEAREST)
-
-        return colour_line_img
