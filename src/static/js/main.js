@@ -101,6 +101,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     document.getElementById('imageClear').addEventListener('click', function(event) {
         fileIndex = 0;
+        inputPreviewContainer.innerHTML = '';
         imageInputForm.reset();
         updateSelectedFile(null);
     });
@@ -127,7 +128,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
     document.getElementById("setOutputAsInput").addEventListener('click', function() {
         imageClear.click()
-        inputPreviewContainer.innerHTML = '';
         updateSelectedFile(outputFile);
     });
 
