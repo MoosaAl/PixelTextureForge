@@ -32,10 +32,26 @@ document.addEventListener("DOMContentLoaded", () => {
     });
 
     let selectedFile = null
+    let fileIndex = 0
     let outputFile = null
     let img_width, img_height = 0
 
-    function file_reader(file, img_id, div_id) {
+    function clearActiveSelection() {
+        let elements = document.getElementsByClassName('active-selection');
+        for(let elem of elements) {
+            elem.classList.remove('active-selection');
+        };
+    }
+
+    function onPreviewClicked(event) {
+        let target = event.target;
+        clearActiveSelection()
+        fileIndex = Number(target.getAttribute('data-file-index'));
+        document.getElementById(`preview-${fileIndex}`).classList.add('active-selection');
+        updateSelectedFile(imageUpload.files[fileIndex]);
+    }
+
+    function fileReader(file, img_id, div_id, customDims = -1, clearPrevious = true) {
         const reader = new FileReader();
         reader.onload = function(e) {
             const img = document.createElement('img');
@@ -43,7 +59,9 @@ document.addEventListener("DOMContentLoaded", () => {
             img.id = img_id;
             img.className = "pure-img";
             const container = document.getElementById(div_id);
-            container.innerHTML = ''; // Clear previous image
+            if (clearPrevious) {
+                container.innerHTML = ''; // Clear previous image
+            }
             container.appendChild(img);
             if (div_id == 'imageContainer') {
                 img.onload = function() {
@@ -54,38 +72,63 @@ document.addEventListener("DOMContentLoaded", () => {
                     rounded_height = Math.round(img_height/pixel_size);
                     document.getElementById('dimensions-label').innerHTML = `${rounded_width}x${rounded_height}`;
                 }
+            } else if (div_id == "inputPreviewContainer") {
+                let clampedDim = customDims <= 0 ? 64 : customDims;
+                img.width = clampedDim;
+                img.height = clampedDim;
+                let idx = Number(img_id.replace('preview-', ''));
+                img.setAttribute('data-file-index', idx);
+                if (fileIndex === idx) {
+                    img.classList.add('active-selection');
+                }
+                img.addEventListener('click', onPreviewClicked);
             }
         }
         reader.readAsDataURL(file);
     }
 
-    document.getElementById('imageUpload').addEventListener('change', function(event) {
-        selectedFile = event.target.files[0];
-        /*
-        loadImage(URL.createObjectURL(selectedFile), (loadedImg) => {
-            canvasImg = loadedImg;
-            scaleCanvasToImage(loadedImg.width, loadedImg.height);
-        });
-        */
+    function updateSelectedFile(data) {
+        selectedFile = data;
         if (selectedFile) {
-            file_reader(selectedFile, 'uploadedImage', 'imageContainer');
+            fileReader(selectedFile, 'uploadedImage', 'imageContainer');
+            imageContainer.classList.remove("hidden")
+        } else {
+            if (uploadedImage) {
+                uploadedImage.remove();
+            }
         }
+    }
+
+    document.getElementById('imageClear').addEventListener('click', function(event) {
+        fileIndex = 0;
+        imageInputForm.reset();
+        updateSelectedFile(null);
     });
 
-    window.addEventListener('paste', e => {
-        selectedFile = e.clipboardData.files[0];
-    
-        console.log('pasted');
+    document.getElementById('imageUpload').addEventListener('change', function(event) {
+        fileIndex = 0;
+        inputPreviewContainer.innerHTML = '';
+        imageClear.classList.remove('hidden');
+        clearActiveSelection();
 
-        if (selectedFile) {
-            file_reader(selectedFile, 'uploadedImage', 'imageContainer');
+        updateSelectedFile(event.target.files[fileIndex]);
+        let fileCt = event.target.files.length;
+        if (fileCt == 1) {
+            return;
+        }
+
+        let i;
+        let newElementTag;
+        for(i = 0; i < fileCt; ++i) {
+            newElementTag = `preview-${i}`;
+            fileReader(event.target.files[i], newElementTag, 'inputPreviewContainer', 100, false);
         }
     });
 
     document.getElementById("setOutputAsInput").addEventListener('click', function() {
-        selectedFile = outputFile;
-        file_reader(selectedFile, 'uploadedImage', 'imageContainer');
-        //document.getElementById('uploadedImage').setAttribute('src', document.getElementById('outputImage').getAttribute('src'));
+        imageClear.click()
+        inputPreviewContainer.innerHTML = '';
+        updateSelectedFile(outputFile);
     });
 
     document.getElementById("makeSeamless").addEventListener('click', function() {
@@ -129,14 +172,6 @@ document.addEventListener("DOMContentLoaded", () => {
             formData.append('blue_shift', document.getElementById('blueShift').value)
 
             fetch_command('/colour_shift', formData);
-        }
-    });
-
-    document.getElementById('getColourPalette').addEventListener('click', function(event) {
-        if (selectedFile) {
-            const formData = new FormData();
-            formData.append('image', selectedFile);
-            fetch_command('/get_colour_palette', formData);
         }
     });
 
@@ -310,7 +345,7 @@ document.addEventListener("DOMContentLoaded", () => {
             } else {
                 outputFile = new File([blob], 'noise.png');
             }
-            file_reader(outputFile, 'uploadedImage', 'outputImage')
+            fileReader(outputFile, 'uploadedImage', 'outputImage')
             loader.style.display = 'none';
         })
         .catch(error => {
