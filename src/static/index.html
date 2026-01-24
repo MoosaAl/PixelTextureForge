@@ -10,8 +10,8 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/purecss@3.0.0/build/grids-responsive-min.css">
     <link rel="stylesheet" href="{{ url_for('static', filename='styles/styles.css') }}">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.9.4/p5.min.js"></script>
-    <script src="{{ url_for('static', filename='js/sketch.js') }}"></script>
-    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/sketch.js') }}" defer></script>
+    <script src="{{ url_for('static', filename='js/main.js') }}" defer></script>
     <title>{{ title }}</title>
 </head>
 <body>
@@ -55,7 +55,8 @@
                     </li>
                     <p>Scale image down resolution (rounded): <span id="dimensions-label"></span></p>
                     <h2>Scale down image</h2>
-                    <button id="scaleDown" class="pure-button pure-button-primary">Scale Down</button>            
+                    <button id="scaleDown" class="pure-button pure-button-primary">Scale Down</button>
+                    <button id="uploadAndScale" class="pure-button pure-button-primary">Pixelize and Scale Down</button>
                 </div>
                 <div id="colours-sidebar">
                     <h2>Shift Colour of image</h2>
@@ -245,12 +246,13 @@
                 </div>
             </div>
             <div class="pure-g">
-                <div class="previewContainer" id="inputPreviewContainer"></div>
-                <div class="pure-u-1-2 container"  id="imageContainer">
-
+                <div class="pure-u-1-2">
+                    <div class="previewContainer" id="inputPreviewContainer"></div>
+                    <div class="container"  id="imageContainer"></div>
                 </div>
                 <div class="pure-u-1-2">
                     <div id="loader"></div>
+                    <div class="previewContainer" id="outputPreviewContainer"></div>
                     <div class="container" id="outputImage">
                     </div>
                 </div>
